@@ -15,7 +15,7 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            overflow: hidden; /* Impede barras de rolagem indesejadas na tela principal */
+            overflow: hidden;
         }
 
         h1 {
@@ -26,15 +26,12 @@
             padding: 0 20px;
         }
 
-        /* Área onde os botões ficam lado a lado inicialmente */
-        .botoes-container {
+        /* Caixa que segura os botões lado a lado perfeitamente */
+        .botoes {
             display: flex;
             gap: 20px;
             align-items: center;
             justify-content: center;
-            position: relative;
-            width: 100%;
-            height: 80px;
         }
 
         button {
@@ -46,16 +43,7 @@
             color: #590d22;
             border-radius: 10px;
             cursor: pointer;
-        }
-
-        /* Botão SIM fica normal no flexbox */
-        #sim {
             z-index: 10;
-        }
-
-        /* Botão NÃO começa no fluxo, mas ganha position absolute quando foge */
-        #nao {
-            transition: all 0.1s ease-in-out;
         }
     </style>
 </head>
@@ -63,7 +51,7 @@
 
     <h1>Você me ama?</h1>
 
-    <div class="botoes-container" id="container">
+    <div class="botoes">
         <button id="sim" onclick="aceito()">Sim</button>
         <button id="nao" onmouseover="fugir()" ontouchstart="fugir()">Não</button>
     </div>
@@ -72,28 +60,18 @@
         function fugir() {
             const btnNao = document.getElementById('nao');
             
-            // Transforma em absolute para poder mover livremente pela tela na primeira fuga
-            if (btnNao.style.position !== 'absolute') {
-                btnNao.style.position = 'absolute';
-            }
-
-            // Pega as dimensões da janela e do botão
-            const larguraJanela = window.innerWidth;
-            const alturaJanela = window.innerHeight;
+            // Pega o tamanho total da tela visível
+            const maxX = window.innerWidth - 120;
+            const maxY = window.innerHeight - 100;
             
-            const larguraBtn = btnNao.offsetWidth;
-            const alturaBtn = btnNao.offsetHeight;
-
-            // Calcula posições aleatórias garantindo uma margem de segurança de 20px das bordas
-            const maxX = larguraJanela - larguraBtn - 20;
-            const maxY = alturaJanela - alturaBtn - 20;
+            // Gera posições estritamente dentro da tela (com margem de segurança)
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
             
-            const randomX = Math.max(20, Math.floor(Math.random() * maxX));
-            const randomY = Math.max(120, Math.floor(Math.random() * (maxY - 50))); // Evita colar no topo (onde está o título)
-
-            // Aplica a nova posição garantindo que ele NUNCA saia da tela
-            btnNao.style.left = randomX + 'px';
-            btnNao.style.top = randomY + 'px';
+            // Transforma em absolute apenas na primeira fuga para soltar da linha
+            btnNao.style.position = 'fixed';
+            btnNao.style.left = Math.max(20, randomX) + 'px';
+            btnNao.style.top = Math.max(100, randomY) + 'px';
         }
 
         function aceito() {
