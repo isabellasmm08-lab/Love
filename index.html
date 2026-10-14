@@ -5,66 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Você me ama?</title>
     <style>
-        /* Define a fonte e remove margens padrão */
         body {
             margin: 0;
+            padding: 0;
             font-family: 'Montserrat', sans-serif;
             background-color: #ffc8dd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden; /* Impede barras de rolagem indesejadas na tela principal */
         }
 
-        /* Título fixo no topo da tela */
         h1 {
             color: #590d22;
             font-size: 2rem;
             text-align: center;
-            padding: 30px;
-            background-color: rgba(255, 200, 221, 0.9); /* Fundo rosa semi-transparente */
-            position: fixed; /* Fica fixo no topo, não sobe com a rolagem */
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000; /* Garante que fica por cima de tudo */
-            margin: 0;
+            margin-bottom: 40px;
+            padding: 0 20px;
         }
 
-        /* O GRANDE SEGREDO: Uma caixa invisível que é MUITO maior que a tela.
-           Isso força o navegador mobile a criar barras de rolagem. */
-        #container-de-rolagem {
+        /* Área onde os botões ficam lado a lado inicialmente */
+        .botoes-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
             position: relative;
             width: 100%;
-            height: 200vh; /* Duas vezes a altura da tela (200% da viewport height) */
-            overflow: auto; /* Força barras de rolagem se algo transbordar */
-            padding-top: 150px; /* Dá espaço para o título fixo */
+            height: 80px;
         }
 
-        /* Estilo comum dos botões */
         button {
             background-color: #ffb3c1;
             border: 2px solid #590d22;
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-size: 1.2rem;
             font-weight: bold;
             color: #590d22;
             border-radius: 10px;
             cursor: pointer;
-            z-index: 10; /* Garante que botões fiquem sobre o contêiner */
         }
 
-        /* Botão SIM: Centralizado inicialmente */
+        /* Botão SIM fica normal no flexbox */
         #sim {
-            position: absolute;
-            left: calc(50% - 40px); /* Tenta centralizar horizontalmente (ajuste conforme necessário) */
-            top: 180px; /* Abaixo do título */
+            z-index: 10;
         }
 
-        /* Botão NÃO: Posicionamento relativo dentro do grande contêiner.
-           Quando ele se mover, ele 'andará' por um espaço maior que a tela,
-           forçando o usuário a rolar para achá-lo. */
+        /* Botão NÃO começa no fluxo, mas ganha position absolute quando foge */
         #nao {
-            position: absolute;
-            top: 180px; /* Mesma altura inicial do SIM */
-            left: calc(50% + 40px); /* Um pouco para a direita do SIM */
-            transition: left 0.3s ease, top 0.3s ease; /* Animação suave */
+            transition: all 0.1s ease-in-out;
         }
     </style>
 </head>
@@ -72,28 +63,35 @@
 
     <h1>Você me ama?</h1>
 
-    <!-- Esta é a "caixa grande" que força a rolagem -->
-    <div id="container-de-rolagem">
+    <div class="botoes-container" id="container">
         <button id="sim" onclick="aceito()">Sim</button>
-        <!-- O 'touchstart' é para garantir que o 'pulo' ocorra no primeiro toque no celular -->
         <button id="nao" onmouseover="fugir()" ontouchstart="fugir()">Não</button>
     </div>
 
     <script>
         function fugir() {
             const btnNao = document.getElementById('nao');
-            const container = document.getElementById('container-de-rolagem');
             
-            // Agora calculamos os limites baseados no tamanho do CONTÊINER grande, não da janela
-            const larguraMax = container.offsetWidth - btnNao.offsetWidth - 20;
-            // A altura máxima é a altura exagerada que definimos (200vh)
-            const alturaMax = container.offsetHeight - btnNao.offsetHeight - 20;
+            // Transforma em absolute para poder mover livremente pela tela na primeira fuga
+            if (btnNao.style.position !== 'absolute') {
+                btnNao.style.position = 'absolute';
+            }
+
+            // Pega as dimensões da janela e do botão
+            const larguraJanela = window.innerWidth;
+            const alturaJanela = window.innerHeight;
             
-            // Gera coordenadas aleatórias dentro desse espaço gigante
-            const randomX = Math.random() * larguraMax;
-            const randomY = Math.random() * alturaMax;
+            const larguraBtn = btnNao.offsetWidth;
+            const alturaBtn = btnNao.offsetHeight;
+
+            // Calcula posições aleatórias garantindo uma margem de segurança de 20px das bordas
+            const maxX = larguraJanela - larguraBtn - 20;
+            const maxY = alturaJanela - alturaBtn - 20;
             
-            // Move o botão para as novas coordenadas
+            const randomX = Math.max(20, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(120, Math.floor(Math.random() * (maxY - 50))); // Evita colar no topo (onde está o título)
+
+            // Aplica a nova posição garantindo que ele NUNCA saia da tela
             btnNao.style.left = randomX + 'px';
             btnNao.style.top = randomY + 'px';
         }
